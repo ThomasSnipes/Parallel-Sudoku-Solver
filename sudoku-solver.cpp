@@ -1,10 +1,10 @@
-// Online C++ compiler to run C++ program online
 #include <iostream>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <thread>
 #include <mutex>
+#include <random>
 
 using namespace std;
 
@@ -12,31 +12,32 @@ mutex mtx;
 
 const int SIZE = 9;
 const int SUBGRID_SIZE = 3;
-const int NUM_STARTING_CELLS = 20; // Number of initially filled cells
+const int NUM_STARTING_CELLS = 20;
 
-// Function to check if a number is safe to place in the given position
-bool isSafe(const vector<vector<int>>& board, int row, int col, int num) {
-    // Check if the number is already present in the row or column
+// Check if a number is safe to place in the given position
+bool isSafe(const vector<vector<int> >& board, int row, int col, int num) {
+
+    // Check if the number is already in the row or column
     for (int i = 0; i < SIZE; ++i) {
         if (board[row][i] == num || board[i][col] == num)
             return false;
     }
 
-    // Check if the number is already present in the current 3x3 subgrid
+    // Check if the number is already in the current subgrid
     int startRow = row - row % SUBGRID_SIZE;
     int startCol = col - col % SUBGRID_SIZE;
+
     for (int i = 0; i < SUBGRID_SIZE; ++i) {
         for (int j = 0; j < SUBGRID_SIZE; ++j) {
             if (board[i + startRow][j + startCol] == num)
                 return false;
         }
     }
-
     return true;
 }
 
 // Function to print the Sudoku board
-void printBoard(const vector<vector<int>>& board) {
+void printBoard(const vector<vector<int> >& board) {
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
             cout << board[i][j] << " ";
@@ -52,8 +53,8 @@ void printBoard(const vector<vector<int>>& board) {
     }
 }
 
-// Generate intial Sudoku board
-void initializeBoard(vector<vector<int>>& board) {
+// Generate initial Sudoku board
+void initializeBoard(vector<vector<int> >& board) {
     srand(time(0));
     int count = NUM_STARTING_CELLS;
 
@@ -68,8 +69,9 @@ void initializeBoard(vector<vector<int>>& board) {
         }
     }
 }
-// Recursive function to solve Sudoku using backtracking
-bool solveSudoku(vector<vector<int>>& board, int row, int col) {
+
+// Solve Sudoku using backtracking
+bool solveSudoku(vector<vector<int> >& board, int row, int col) {
     if (row == SIZE - 1 && col == SIZE)
         return true;
 
@@ -78,9 +80,9 @@ bool solveSudoku(vector<vector<int>>& board, int row, int col) {
         col = 0;
     }
 
-    if (board[row][col] != 0)
+    if (board[row][col] != 0){
         return solveSudoku(board, row, col + 1);
-
+    }
     for (int num = 1; num <= SIZE; ++num) {
         if (isSafe(board, row, col, num)) {
             board[row][col] = num;
@@ -93,35 +95,33 @@ bool solveSudoku(vector<vector<int>>& board, int row, int col) {
     return false;
 }
 
-// Function executed by each thread to solve Sudoku
-void solveSudokuParallel(vector<vector<int>> board, int threadID) {
+// Function executed by each thread
+void solveSudokuParallel(vector<vector<int> > board, int threadID) {
     if (solveSudoku(board, 0, threadID)) {
         mtx.lock();
         cout << "Thread " << threadID << " found a solution:" << endl;
         printBoard(board);
         mtx.unlock();
     } else {
-        mtx.lock();
         cout << "Thread " << threadID << " did not find a solution." << endl;
-        mtx.unlock();
     }
 }
 
 int main() {
-    vector<vector<int>> board(SIZE, vector<int>(SIZE, 0));
+    vector<vector<int> > board(SIZE, vector<int>(SIZE, 0));
 
     initializeBoard(board);
 
     cout << "Initial board:" << endl;
     printBoard(board);
     
-    // Create threads to solve Sudoku in parallel
+    // Spawn threads
     vector<thread> threads;
     for (int i = 0; i < SIZE; ++i) {
         threads.emplace_back(solveSudokuParallel, board, i);
     }
 
-    // Join threads
+    // Join
     for (auto& t : threads) {
         t.join();
     }
