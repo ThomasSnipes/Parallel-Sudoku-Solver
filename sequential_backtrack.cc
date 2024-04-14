@@ -1,8 +1,17 @@
 #include <iostream>
+#include <chrono>
 #define N 9
 using namespace std;
 
-int grid[N][N];
+int grid[N][N] = { { 3, 0, 6, 5, 0, 8, 4, 0, 0 },
+                       { 5, 2, 0, 0, 0, 0, 0, 0, 0 },
+                       { 0, 8, 7, 0, 0, 0, 0, 3, 1 },
+                       { 0, 0, 3, 0, 1, 0, 0, 8, 0 },
+                       { 9, 0, 0, 8, 6, 3, 0, 0, 5 },
+                       { 0, 5, 0, 0, 9, 0, 6, 0, 0 },
+                       { 1, 3, 0, 0, 0, 0, 2, 5, 0 },
+                       { 0, 0, 0, 0, 0, 0, 0, 7, 4 },
+                       { 0, 0, 5, 2, 0, 0, 3, 0, 0 } };
 
 
 //prints the grid
@@ -72,8 +81,12 @@ bool solveSudoku(){
 }
 int main(){
     //need to construct a grid or read one in from file
-    
-    if (solveSudoku()){
+    auto start_time = std::chrono::high_resolution_clock::now();
+    bool res = solveSudoku();
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+    std::cout << "runtime duration:: " << duration << std::endl;
+    if (res){
         cout << "solution found! " << endl;
         print();
     }     
