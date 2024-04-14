@@ -1,28 +1,19 @@
 #include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <mutex>
+#include <random>
 #include <chrono>
-#define N 9
+
 using namespace std;
 
-int grid[N][N] = { { 3, 0, 6, 5, 0, 8, 4, 0, 0 },
-                       { 5, 2, 0, 0, 0, 0, 0, 0, 0 },
-                       { 0, 8, 7, 0, 0, 0, 0, 3, 1 },
-                       { 0, 0, 3, 0, 1, 0, 0, 8, 0 },
-                       { 9, 0, 0, 8, 6, 3, 0, 0, 5 },
-                       { 0, 5, 0, 0, 9, 0, 6, 0, 0 },
-                       { 1, 3, 0, 0, 0, 0, 2, 5, 0 },
-                       { 0, 0, 0, 0, 0, 0, 0, 7, 4 },
-                       { 0, 0, 5, 2, 0, 0, 3, 0, 0 } };
+const int N = 9;
+const int SUBGRID_SIZE = 3;
+const int NUM_STARTING_CELLS = 20;
 
-
-//prints the grid
-void print(){
-    for (int i = 0; i < N; i++) 
-    {
-        for (int j = 0; j < N; j++)
-            cout << grid[i][j] << " ";
-        cout << endl;
-    }
-}
+vector<vector<int> > grid(N, vector<int>(N, 0));
 
 //checks if num is in the column
 bool isPresentCol(int col, int num){
@@ -49,6 +40,28 @@ bool isPresentLocal(int boxStartRow, int boxStartCol, int num){
     return false;
 }
 
+//checks the row, column and local box
+bool isValidPlace(int row, int col, int num){
+   return !isPresentRow(row, num) && !isPresentCol(col, num) && !isPresentLocal(row - row%3 ,col - col%3, num);
+}
+
+// Generate initial Sudoku board
+void initializeBoard(vector<vector<int> >& board) {
+    srand(time(0));
+    int count = NUM_STARTING_CELLS;
+
+    while (count > 0) {
+        int row = rand() % N;
+        int col = rand() % N;
+        int num = rand() % N + 1;
+
+        if (board[row][col] == 0 && isValidPlace(row, col, num)) {
+            board[row][col] = num;
+            count--;
+        }
+    }
+}
+
 //find the first empty location in the grid
 bool findEmptyPlace(int &row, int &col){
    for (row = 0; row < N; row++)
@@ -56,11 +69,6 @@ bool findEmptyPlace(int &row, int &col){
          if (grid[row][col] == 0) //marked with 0 is empty
             return true;
    return false;
-}
-
-//checks the row, column and local box
-bool isValidPlace(int row, int col, int num){
-   return !isPresentRow(row, num) && !isPresentCol(col, num) && !isPresentLocal(row - row%3 ,col - col%3, num);
 }
 
 //solver
@@ -79,16 +87,37 @@ bool solveSudoku(){
     }
     return false;
 }
+
+// Function to print the Sudoku board
+void printBoard() {
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            cout << grid[i][j] << " ";
+            if ((j + 1) % SUBGRID_SIZE == 0 && j != N - 1)
+                cout << "| ";
+        }
+        cout << endl;
+        if ((i + 1) % SUBGRID_SIZE == 0 && i != N - 1) {
+            for (int k = 0; k < N + SUBGRID_SIZE - 1; ++k)
+                cout << "--";
+            cout << endl;
+        }
+    }
+}
+
 int main(){
     //need to construct a grid or read one in from file
+    initializeBoard(grid);
+    printBoard();
     auto start_time = std::chrono::high_resolution_clock::now();
     bool res = solveSudoku();
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-    std::cout << "runtime duration:: " << duration << std::endl;
+    std::cout << "\nruntime duration:: " << duration << " microseconds\n" << std::endl;
+
     if (res){
         cout << "solution found! " << endl;
-        print();
+        printBoard();
     }     
     else
         cout << "No solution exists";

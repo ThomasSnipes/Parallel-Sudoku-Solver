@@ -17,7 +17,8 @@ bool isValid(vector<vector<int>>& board, int row, int col, int num) {
     // Check if the number is already present in the 3x3 box
     int startRow = row - row % 3;
     int startCol = col - col % 3;
-    //loop over local grid
+
+    // Loop over local grid
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             if (board[i + startRow][j + startCol] == num)

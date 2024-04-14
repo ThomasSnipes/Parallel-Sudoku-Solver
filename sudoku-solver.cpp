@@ -83,6 +83,7 @@ bool solveSudoku(vector<vector<int> >& board, int row, int col) {
     if (board[row][col] != 0){
         return solveSudoku(board, row, col + 1);
     }
+
     for (int num = 1; num <= SIZE; ++num) {
         if (isSafe(board, row, col, num)) {
             board[row][col] = num;
@@ -91,7 +92,7 @@ bool solveSudoku(vector<vector<int> >& board, int row, int col) {
             board[row][col] = 0;
         }
     }
-
+    std::cout << "false";
     return false;
 }
 
@@ -107,24 +108,27 @@ void solveSudokuParallel(vector<vector<int> > board, int threadID) {
     }
 }
 
+
 int main() {
     vector<vector<int> > board(SIZE, vector<int>(SIZE, 0));
 
     initializeBoard(board);
 
-    cout << "Initial board:" << endl;
+    cout << "Starting board:" << endl;
     printBoard(board);
+
+    std:: cout << solveSudoku(board, 0, 0);
     
     // Spawn threads
-    vector<thread> threads;
-    for (int i = 0; i < SIZE; ++i) {
-        threads.emplace_back(solveSudokuParallel, board, i);
-    }
+    // vector<thread> threads;
+    // for (int i = 0; i < SIZE; ++i) {
+    //     threads.emplace_back(solveSudokuParallel, board, i);
+    // }
 
-    // Join
-    for (auto& t : threads) {
-        t.join();
-    }
+    // // Join
+    // for (auto& t : threads) {
+    //     t.join();
+    // }
 
     return 0;
 }

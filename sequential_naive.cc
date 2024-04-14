@@ -1,21 +1,22 @@
 #include <iostream>
- 
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <mutex>
+#include <random>
+#include <chrono>
 using namespace std;
  
 // N is the size of the 2D matrix   N*N
-#define N 9
- 
-void print(int arr[N][N]){
-    for (int i = 0; i < N; i++) 
-    {
-        for (int j = 0; j < N; j++)
-            cout << arr[i][j] << " ";
-        cout << endl;
-    }
-}
- 
+//#define N 9
+
+const int N = 9;
+const int SUBGRID_SIZE = 3;
+const int NUM_STARTING_CELLS = 20;
+
 //check if we can assign a number in grid
-bool isSafe(int grid[N][N], int row, int col, int num){
+bool isSafe(vector<vector<int> >& grid, int row, int col, int num){
     // Check row
     for (int x = 0; x <= 8; x++)
         if (grid[row][x] == num)
@@ -27,19 +28,46 @@ bool isSafe(int grid[N][N], int row, int col, int num){
             return false;
  
     // Check local 3x3 grid
-    int startRow = row - row % 3, 
-            startCol = col - col % 3;
+    int startRow = row - row % SUBGRID_SIZE;
+    int startCol = col - col % SUBGRID_SIZE;
    
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            if (grid[i + startRow][j + 
-                            startCol] == num)
+            if (grid[i + startRow][j + startCol] == num)
                 return false;
  
     return true;
 }
+
+// Generate initial Sudoku board
+void initializeBoard(vector<vector<int> >& board) {
+    srand(time(0));
+    int count = NUM_STARTING_CELLS;
+
+    while (count > 0) {
+        int row = rand() % N;
+        int col = rand() % N;
+        int num = rand() % N + 1;
+
+        if (board[row][col] == 0 && isSafe(board, row, col, num)) {
+            board[row][col] = num;
+            count--;
+        }
+    }
+}
+
+void print(int arr[N][N]){
+    for (int i = 0; i < N; i++) 
+    {
+        for (int j = 0; j < N; j++)
+            cout << arr[i][j] << " ";
+        cout << endl;
+    }
+}
  
-bool solveSudoku(int grid[N][N], int row, int col){
+
+ 
+bool solveSudoku(vector<vector<int> >& grid, int row, int col){
     //reached end of matrix
     if (row == N - 1 && col == N)
         return true;
@@ -70,26 +98,43 @@ bool solveSudoku(int grid[N][N], int row, int col){
     }
     return false;
 }
- 
+
+// Function to print the Sudoku board
+void printBoard(const vector<vector<int> >& board) {
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            cout << board[i][j] << " ";
+            if ((j + 1) % SUBGRID_SIZE == 0 && j != N - 1)
+                cout << "| ";
+        }
+        cout << endl;
+        if ((i + 1) % SUBGRID_SIZE == 0 && i != N - 1) {
+            for (int k = 0; k < N + SUBGRID_SIZE - 1; ++k)
+                cout << "--";
+            cout << endl;
+        }
+    }
+}
+
 int main(){
-    //test grid
-    //change this later to read in a grid we generate?
-    int grid[N][N] = { { 3, 0, 6, 5, 0, 8, 4, 0, 0 },
-                       { 5, 2, 0, 0, 0, 0, 0, 0, 0 },
-                       { 0, 8, 7, 0, 0, 0, 0, 3, 1 },
-                       { 0, 0, 3, 0, 1, 0, 0, 8, 0 },
-                       { 9, 0, 0, 8, 6, 3, 0, 0, 5 },
-                       { 0, 5, 0, 0, 9, 0, 6, 0, 0 },
-                       { 1, 3, 0, 0, 0, 0, 2, 5, 0 },
-                       { 0, 0, 0, 0, 0, 0, 0, 7, 4 },
-                       { 0, 0, 5, 2, 0, 0, 3, 0, 0 } };
- 
-    if (solveSudoku(grid, 0, 0)){
+
+    vector<vector<int> > grid(N, vector<int>(N, 0));
+
+    initializeBoard(grid);
+    printBoard(grid);
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    bool res = solveSudoku(grid, 0, 0);
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+    std::cout << "\nruntime duration:: " << duration << " microseconds\n" << std::endl;
+
+    if (res){
         cout << "solution found!" << endl;
-        print(grid);
+        printBoard(grid);
     }
     else
-        cout << "no solution  exists " << endl;
+        cout << "no solution exists " << endl;
  
     return 0;
 }
