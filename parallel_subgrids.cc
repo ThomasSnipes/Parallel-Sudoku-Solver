@@ -106,7 +106,7 @@ void solveSudoku(vector<vector<int>> board) {
             found_solution = true;
             mtx.lock();
             //printPuzzleList(puzzle_list);
-            final_board = puzzle_list.front();
+            final_board = current_board;
             puzzle_list = queue<vector<vector<int>>>(); // Clear puzzle list to signal other threads to terminate
 
             mtx.unlock();
@@ -149,15 +149,15 @@ int main() {
     auto start_time = chrono::high_resolution_clock::now();
 
     thread t1(solveSudoku, board);
-    //thread t2(solveSudoku, board);
+    thread t2(solveSudoku, board);
     
     t1.join();
-   // t2.join();
+    t2.join();
     printBoard(board);
     auto end_time = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(end_time - start_time).count();
     cout << "Runtime duration: " << duration << " microseconds" << endl;
-    printBoard(final_board);
+
     if (!final_board.empty()) {
         cout << "Solved successfully:\n";
         printBoard(final_board);
