@@ -31,8 +31,8 @@ bool isSafe(vector<vector<int> >& grid, int row, int col, int num){
     int startRow = row - row % SUBGRID_SIZE;
     int startCol = col - col % SUBGRID_SIZE;
    
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
+    for (int i = 0; i < SUBGRID_SIZE; i++)
+        for (int j = 0; j < SUBGRID_SIZE; j++)
             if (grid[i + startRow][j + startCol] == num)
                 return false;
  
@@ -56,17 +56,6 @@ void initializeBoard(vector<vector<int> >& board) {
     }
 }
 
-void print(int arr[N][N]){
-    for (int i = 0; i < N; i++) 
-    {
-        for (int j = 0; j < N; j++)
-            cout << arr[i][j] << " ";
-        cout << endl;
-    }
-}
- 
-
- 
 bool solveSudoku(vector<vector<int> >& grid, int row, int col){
     //reached end of matrix
     if (row == N - 1 && col == N)
