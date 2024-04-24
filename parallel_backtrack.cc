@@ -54,7 +54,7 @@ bool solveSudokuUtil(vector<vector<int>>& board, int row, int col) {
             #pragma omp parallel sections
             {
                 #pragma omp section
-                if (solveSudokuUtil(board, row, col + 1))
+                if (solveSudokuUtil(board, row, col + 1)) //increase column index here
                     return true;
             }
 
