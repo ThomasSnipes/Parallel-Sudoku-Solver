@@ -77,7 +77,7 @@ bool solveSudoku(){
     if (!findEmptyPlace(row, col))
         return true; //when all places are filled
     for (int num = 1; num <= 9; num++){ //valid numbers are 1 - 9
-        //check if location is vlaid for num, then place it
+        //check if location is valid for num, then place it
         if (isValidPlace(row, col, num)){ 
             grid[row][col] = num;
             if (solveSudoku()) //recursively go for other rooms in the grid
