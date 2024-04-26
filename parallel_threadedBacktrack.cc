@@ -1,11 +1,13 @@
 #include <iostream>
 #include <vector>
-#include <omp.h>
+#include <thread>
 #include <chrono>
+#include <mutex>
 
 using namespace std;
 
 const int N = 9;
+const int num_threads = 6;
 
 bool isValid(vector<vector<int>>& board, int row, int col, int num) {
     //Check row and col
@@ -28,6 +30,8 @@ bool isValid(vector<vector<int>>& board, int row, int col, int num) {
     return true;
 }
 
+mutex mtx; //global mutex
+
 bool solveSudokuUtil(vector<vector<int>>& board, int row, int col) {
     //At end of grid
     if (row == N - 1 && col == N)
@@ -48,18 +52,22 @@ bool solveSudokuUtil(vector<vector<int>>& board, int row, int col) {
         // Check if it's safe to place 'num' in the current cell
         if (isValid(board, row, col, num)) {
             // Place the number and recursively solve for the next cell
-            board[row][col] = num;
-
-            // Parallelize this part
-            #pragma omp parallel sections
+            //lock before placing
+            //scope for lock
             {
-                #pragma omp section
-                if (solveSudokuUtil(board, row, col + 1)) //increase column index here
-                    return true;
+                lock_guard<mutex> lock(mtx);
+                board[row][col] = num;
             }
+            
+
+            if (solveSudokuUtil(board, row, col + 1)) //increase column index here
+                return true;
 
             //begin backtrack
-            board[row][col] = 0;
+            {
+                lock_guard<mutex> lock(mtx);
+                board[row][col] = 0;
+            }
         }
     }
     return false; // No solution found
@@ -67,11 +75,21 @@ bool solveSudokuUtil(vector<vector<int>>& board, int row, int col) {
 
 bool solveSudoku(vector<vector<int>>& board) {
     //measure perf
+    //spawn threads here - start at 4 locations in the board
+    std::vector<thread> threads;
     auto start_time = std::chrono::high_resolution_clock::now();
-    bool res = solveSudokuUtil(board, 0, 0);
+    bool res = false;
+    for (int i = 0; i < num_threads; i++){
+        threads.emplace_back([&](){
+                    res = res | solveSudokuUtil(board, i, i);
+                });
+    }
+    for (auto &t : threads){
+        t.join();
+    }
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-    std::cout << "runtime duration:: " << duration << std::endl;
+    std::cout << "runtime duration:: " << duration << " microseconds" << std::endl;
     return res;
 }
 
