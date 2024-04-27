@@ -8,6 +8,7 @@
 using namespace std;
 
 const int N = 9;
+const int subSize = 3;
 const int num_threads = 5;
 std::atomic<int> filled_counter{};
 vector<vector<int>> board;
@@ -25,8 +26,8 @@ bool isValid(int row, int col, int num) {
     int startCol = col - col % 3;
 
     // Loop over local grid
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
+    for (int i = 0; i < subSize; ++i) {
+        for (int j = 0; j < subSize; ++j) {
             if (board[i + startRow][j + startCol] == num)
                 return false;
         }
@@ -63,7 +64,7 @@ bool solveSudokuUtil(int row, int col) {
         return solveSudokuUtil(row, col + 1);
 
     //range of possible numbers is 1-9
-    for (int num = 1; num <= 9; ++num) {
+    for (int num = 1; num <= N; ++num) {
         // Check if it's safe to place 'num' in the current cell
         if (isValid(row, col, num)) {
             // Place the number and recursively solve for the next cell
