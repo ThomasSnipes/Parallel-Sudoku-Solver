@@ -98,23 +98,43 @@ bool solveSudoku() {
     //measure perf
     //spawn threads here - start at 4 locations in the board
     std::vector<thread> threads;
-    auto start_time = std::chrono::high_resolution_clock::now();
     bool res = false;
+    auto start_time = std::chrono::high_resolution_clock::now();
+    
     // for (int i = 0; i < num_threads; i++){
     //     threads.emplace_back([&](){
     //                 res = res | solveSudokuUtil(i, 0);
     //             });
     // }
 
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(0, 0);
+    //             });
+    // // threads.emplace_back([&](){
+    // //     res = res | solveSudokuUtil(1, 1);
+    // // });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(3, 1);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(6, 2);
+    //             });
+
     threads.emplace_back([&](){
                     res = res | solveSudokuUtil(0, 0);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(3, 1);
+                    res = res | solveSudokuUtil(2, 2);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(6, 2);
+                    res = res | solveSudokuUtil(4, 4);
                 });
+    threads.emplace_back([&](){
+                    res = res | solveSudokuUtil(6, 6);
+                });
+
+
+    
     for (auto &t : threads){
         t.join();
     }
@@ -134,27 +154,18 @@ void printBoard() {
 }
 
 int main() {
-    board = {
-        {5, 3, 0, 0, 7, 0, 0, 0, 0},
-        {6, 0, 0, 1, 9, 5, 0, 0, 0},
-        {0, 9, 8, 0, 0, 0, 0, 6, 0},
-        {8, 0, 0, 0, 6, 0, 0, 0, 3},
-        {4, 0, 0, 8, 0, 3, 0, 0, 1},
-        {7, 0, 0, 0, 2, 0, 0, 0, 6},
-        {0, 6, 0, 0, 0, 0, 2, 8, 0},
-        {0, 0, 0, 4, 1, 9, 0, 0, 5},
-        {0, 0, 0, 0, 8, 0, 0, 7, 9}
-    };
 
-    // vector<vector<int>> board = {{0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0},
-    //         {0,0,0,0,0,0,0,0,0}};
+
+    board =  {{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+};
 
     // if (solveSudoku(board)) {
     //     cout << "Sudoku solved successfully:\n";

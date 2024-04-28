@@ -4,7 +4,7 @@
 
 const int SIZE = 9;
 const int SUBGRID_SIZE = 3;
-const int NUM_STARTING_CELLS = 22;
+const int NUM_STARTING_CELLS = 0;
 
 
 using namespace std;

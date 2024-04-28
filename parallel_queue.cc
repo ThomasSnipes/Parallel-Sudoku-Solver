@@ -258,15 +258,27 @@ int main() {
     // };
 
     vector<vector<int> > board(N, vector<int>(N, 0));
-    initializeBoard(board);
+
+    board = {{0, 0, 0, 0, 0, 0, 2, 3, 0},
+{2, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 3, 0, 8, 0, 0},
+{8, 6, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 2, 9, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 3, 0, 0, 7, 1, 0, 0, 0},
+{0, 0, 0, 0, 9, 3, 0, 0, 0},
+{0, 8, 0, 0, 0, 0, 0, 0, 0},
+};
+
+    //initializeBoard(board);
     
-    printBoard(board);
+    //printBoard(board);
     
     pthread_mutex_init(&mtx, nullptr);
     puzzle_list.push(board);
 
     // Create threads
-    pthread_t thread1, thread2, thread3, thread4, thread5, thread6, thread7, thread8;
+    pthread_t thread1, thread2, thread3, thread4, thread5, thread6, thread7, thread8, thread9, thread10, thread11, thread12, thread13, thread14, thread15, thread16;
 
     auto start_time = chrono::high_resolution_clock::now();
 
@@ -279,6 +291,15 @@ int main() {
     pthread_create(&thread7, nullptr, solveSudoku, (void*)&board);
     pthread_create(&thread8, nullptr, solveSudoku, (void*)&board);
 
+    // pthread_create(&thread9, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread10, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread11, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread12, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread13, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread14, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread15, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread16, nullptr, solveSudoku, (void*)&board);
+
     // Wait for threads to finish
     pthread_join(thread1, nullptr);
     pthread_join(thread2, nullptr);
@@ -288,6 +309,15 @@ int main() {
     pthread_join(thread6, nullptr);
     pthread_join(thread7, nullptr);
     pthread_join(thread8, nullptr);
+
+    // pthread_join(thread9, nullptr);
+    // pthread_join(thread10, nullptr);
+    // pthread_join(thread11, nullptr);
+    // pthread_join(thread12, nullptr);
+    // pthread_join(thread13, nullptr);
+    // pthread_join(thread14, nullptr);
+    // pthread_join(thread15, nullptr);
+    // pthread_join(thread16, nullptr);
 
     pthread_mutex_destroy(&mtx);
 
