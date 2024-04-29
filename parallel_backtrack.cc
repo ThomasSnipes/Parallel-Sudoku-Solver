@@ -54,7 +54,7 @@ bool solveSudokuUtil(vector<vector<int>>& board, int row, int col) {
             #pragma omp parallel sections
             {
                 #pragma omp section
-                if (solveSudokuUtil(board, row, col + 1)) //increase column index here
+                if (solveSudokuUtil(board, row, col + 1)) //move to the next column
                     return true;
             }
 
@@ -85,17 +85,28 @@ void printBoard(const vector<vector<int>>& board) {
 }
 
 int main() {
-    vector<vector<int>> board = {
-        {5, 3, 0, 0, 7, 0, 0, 0, 0},
-        {6, 0, 0, 1, 9, 5, 0, 0, 0},
-        {0, 9, 8, 0, 0, 0, 0, 6, 0},
-        {8, 0, 0, 0, 6, 0, 0, 0, 3},
-        {4, 0, 0, 8, 0, 3, 0, 0, 1},
-        {7, 0, 0, 0, 2, 0, 0, 0, 6},
-        {0, 6, 0, 0, 0, 0, 2, 8, 0},
-        {0, 0, 0, 4, 1, 9, 0, 0, 5},
-        {0, 0, 0, 0, 8, 0, 0, 7, 9}
-    };
+    // vector<vector<int>> board = {
+    //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
+    //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
+    //     {0, 9, 8, 0, 0, 0, 0, 6, 0},
+    //     {8, 0, 0, 0, 6, 0, 0, 0, 3},
+    //     {4, 0, 0, 8, 0, 3, 0, 0, 1},
+    //     {7, 0, 0, 0, 2, 0, 0, 0, 6},
+    //     {0, 6, 0, 0, 0, 0, 2, 8, 0},
+    //     {0, 0, 0, 4, 1, 9, 0, 0, 5},
+    //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    // };
+
+    vector<vector<int>> board = {{0, 0, 0, 4, 0, 5, 0, 0, 0},
+{5, 0, 0, 0, 2, 0, 0, 0, 1},
+{0, 0, 4, 0, 7, 0, 0, 0, 3},
+{0, 0, 8, 9, 4, 0, 6, 0, 0},
+{0, 0, 0, 8, 0, 0, 4, 0, 0},
+{1, 0, 0, 0, 6, 0, 0, 9, 0},
+{8, 0, 0, 3, 0, 0, 0, 0, 5},
+{0, 0, 9, 0, 0, 0, 0, 2, 0},
+{0, 0, 0, 0, 0, 8, 0, 0, 0},
+};
 
     if (solveSudoku(board)) {
         cout << "Sudoku solved successfully:\n";
