@@ -8,11 +8,11 @@
 using namespace std;
 
 const int N = 9;
-const int subSize = 3;
+const int SUBGRID_SIZE = 3;
 const int num_threads = 5;
+const int NUM_STARTING_CELLS = 20;
 std::atomic<int> filled_counter{};
-vector<vector<int>> board;
-
+vector<vector<int> > board(N, vector<int>(N, 0));
 
 bool isValid(int row, int col, int num) {
     //Check row and col
@@ -26,8 +26,8 @@ bool isValid(int row, int col, int num) {
     int startCol = col - col % 3;
 
     // Loop over local grid
-    for (int i = 0; i < subSize; ++i) {
-        for (int j = 0; j < subSize; ++j) {
+    for (int i = 0; i < SUBGRID_SIZE; ++i) {
+        for (int j = 0; j < SUBGRID_SIZE; ++j) {
             if (board[i + startRow][j + startCol] == num)
                 return false;
         }
@@ -87,7 +87,6 @@ bool solveSudokuUtil(int row, int col) {
                 board[row][col] = 0;
                 //bad choice, remove it
                 filled_counter--;
-                //std::cout << filled_counter << std::endl;
             }
         }
     }
@@ -95,42 +94,22 @@ bool solveSudokuUtil(int row, int col) {
 }
 
 bool solveSudoku() {
-    //measure perf
-    //spawn threads here - start at 4 locations in the board
+
     std::vector<thread> threads;
     bool res = false;
     auto start_time = std::chrono::high_resolution_clock::now();
     
-    // for (int i = 0; i < num_threads; i++){
-    //     threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(i, 0);
-    //             });
-    // }
-
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(0, 0);
-    //             });
-    // // threads.emplace_back([&](){
-    // //     res = res | solveSudokuUtil(1, 1);
-    // // });
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(3, 1);
-    //             });
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(6, 2);
-    //             });
-
     threads.emplace_back([&](){
                     res = res | solveSudokuUtil(0, 0);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(2, 2);
+                    res = res | solveSudokuUtil(0, N-1);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(4, 4);
+                    res = res | solveSudokuUtil(N-1, 0);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(6, 6);
+                    res = res | solveSudokuUtil(N-1, N-1);
                 });
 
 
@@ -144,39 +123,59 @@ bool solveSudoku() {
     return res;
 }
 
-void printBoard() {
+// Function to print the Sudoku board
+void printBoard(vector<vector<int>> board) {
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
             cout << board[i][j] << " ";
+            if ((j + 1) % SUBGRID_SIZE == 0 && j != N - 1)
+                cout << "| ";
         }
         cout << endl;
+        if ((i + 1) % SUBGRID_SIZE == 0 && i != N - 1) {
+            for (int k = 0; k < N + SUBGRID_SIZE - 1; ++k)
+                cout << "--";
+            cout << endl;
+        }
+    }
+}
+
+// Generate initial Sudoku board
+void initializeBoard(vector<vector<int> >& board) {
+    srand(time(0));
+    int count = NUM_STARTING_CELLS;
+
+    while (count > 0) {
+        int row = rand() % N;
+        int col = rand() % N;
+        int num = rand() % N + 1;
+
+        if (board[row][col] == 0 && isValid(row, col, num)) {
+            board[row][col] = num;
+            count--;
+        }
     }
 }
 
 int main() {
 
 
-    board =  {{0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    };
+    // board =  {{0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // };
 
-    // if (solveSudoku(board)) {
-    //     cout << "Sudoku solved successfully:\n";
-    //     printBoard(board);
-    // } else {
-    //     cout << "No solution exists for the given Sudoku.\n";
-    // }
-
+    initializeBoard(board);
+    //printBoard(board);
     if (solveSudoku()) {
         cout << "Sudoku solved successfully:\n";
-        printBoard();
+        printBoard(board);
     } else {
         cout << "No solution exists for the given Sudoku.\n";
     }
