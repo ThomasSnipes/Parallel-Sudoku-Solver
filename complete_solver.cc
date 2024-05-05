@@ -4,6 +4,8 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <cstdlib> 
+#include <algorithm>
 
 using namespace std;
 
@@ -11,13 +13,14 @@ const int N = 9;
 const int SUBGRID_SIZE = 3;
 const int num_threads = 5;
 const int NUM_STARTING_CELLS = 20;
-const int MAX = 10000;
+const int MAX = 1000;
 int iter = 0;
+
 
 vector<vector<int> > board(N, vector<int>(N, 0));
 vector<vector<vector<int>>> solutions;
 
-// Function to print the Sudoku board
+
 void printBoard(vector<vector<int>> board) {
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
@@ -55,9 +58,6 @@ bool isValid(int row, int col, int num) {
     return true;
 }
 
-
-
-//find the first empty location in the grid
 bool findEmptyPlace(int &row, int &col){
    for (row = 0; row < N; row++)
       for (col = 0; col < N; col++)
@@ -77,13 +77,13 @@ bool boardsEqual(const vector<vector<int>>& board1, const vector<vector<int>>& b
     return true;
 }
 
+
 bool solveSudoku() {
     int row;
     int col;
-    iter += 1;
 
     if (!findEmptyPlace(row, col)) {
-
+        
         bool unique_solution = true;
 
         // Check if the current board is already in solutions
@@ -94,14 +94,20 @@ bool solveSudoku() {
             }
         }
 
+        // If unique_solution is true
         if (unique_solution) {
             solutions.push_back(board);
-            printBoard(board);
         }
+        
         return true;
     }
 
-    for (int num = 1; num <= 9; num++) {
+    // Shuffle the order of numbers to try
+    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    random_shuffle(nums.begin(), nums.end());
+
+    for (int num : nums) {
+
         if (isValid(row, col, num)) {
             board[row][col] = num;
 
@@ -109,13 +115,12 @@ bool solveSudoku() {
                 return true;
             }
 
-            board[row][col] = 0; // Turn to unassigned space when conditions are not satisfied
+            // Turn to unassigned space when conditions are not satisfied
+            board[row][col] = 0; 
         }
     }
-    
     return false;
 }
-
 
 
 // Generate initial Sudoku board
@@ -140,39 +145,37 @@ vector<vector<int>> initializeBoard() {
 
 int main() {
 
-    // board = {{0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // };
+    board = 
+   {{0, 0, 1, 0, 0, 2, 0, 0, 3},
+    {0, 4, 0, 0, 0, 0, 0, 5, 0},
+    {5, 0, 0, 6, 0, 0, 7, 0, 0},
+    {8, 0, 0, 0, 0, 9, 6, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 3, 1, 0, 0, 0, 0, 2},
+    {0, 0, 2, 0, 0, 8, 0, 0, 9},
+    {0, 6, 0, 0, 0, 0, 0, 4, 0},
+    {7, 0, 0, 3, 0, 0, 1, 0, 0},
+    };
     
-    vector<vector<vector<int>>> solutions;
-
-    board = initializeBoard();
+    //board = initializeBoard();
 
     vector<vector<int> > start_board = board;
     printBoard(board);
 
-
     auto start_time = chrono::high_resolution_clock::now();
-    
+    std::cout<<"before";
     for(int i=0; i<MAX; i++){
-        // Reset flag before each call to solveSudoku
+        // Reset board before solving again
         std::cout<<"test";
-        board = start_board;
         solveSudoku();
+        board = start_board;
     }
 
     auto end_time = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(end_time - start_time).count();
+    auto duration = chrono::duration_cast<chrono::seconds>(end_time - start_time).count();
 
     std::cout << "Number of solutions: " << solutions.size() << endl;
-    std::cout << "Runtime duration: " << duration << " microseconds" << endl;
+    std::cout << "Runtime duration: " << duration << " seconds" << endl;
 
     // Print all solutions
     for (const auto& sol : solutions) {
