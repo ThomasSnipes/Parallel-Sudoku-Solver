@@ -107,31 +107,31 @@ bool solveSudoku() {
     //             });
     // }
 
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(0, 0);
-    //             });
-    // // threads.emplace_back([&](){
-    // //     res = res | solveSudokuUtil(1, 1);
-    // // });
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(3, 1);
-    //             });
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(6, 2);
-    //             });
-
     threads.emplace_back([&](){
                     res = res | solveSudokuUtil(0, 0);
                 });
+    // threads.emplace_back([&](){
+    //     res = res | solveSudokuUtil(1, 1);
+    // });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(2, 2);
+                    res = res | solveSudokuUtil(3, 1);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(4, 4);
+                    res = res | solveSudokuUtil(6, 2);
                 });
-    threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(6, 6);
-                });
+
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(0, 0);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(2, 2);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(4, 4);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(6, 6);
+    //             });
 
 
     
@@ -156,16 +156,17 @@ void printBoard() {
 int main() {
 
 
-    board =  {{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-};
+    board = {
+        {5, 3, 0, 0, 7, 0, 0, 0, 0},
+        {6, 0, 0, 1, 9, 5, 0, 0, 0},
+        {0, 9, 8, 0, 0, 0, 0, 6, 0},
+        {8, 0, 0, 0, 6, 0, 0, 0, 3},
+        {4, 0, 0, 8, 0, 3, 0, 0, 1},
+        {7, 0, 0, 0, 2, 0, 0, 0, 6},
+        {0, 6, 0, 0, 0, 0, 2, 8, 0},
+        {0, 0, 0, 4, 1, 9, 0, 0, 5},
+        {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    };
 
     // if (solveSudoku(board)) {
     //     cout << "Sudoku solved successfully:\n";
