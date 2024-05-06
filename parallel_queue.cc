@@ -131,93 +131,7 @@ void* solveSudoku(void* arg) {
     
     return nullptr;
 }
-// void* solveSudoku(void* arg) {
-//     //vector<vector<int>>* board = static_cast<vector<vector<int>>*>(arg);
 
-//     //vector<vector<int>> current_board = *board;
-
-//     while (true) {
-        
-//         // Acquire lock before accessing the global puzzle list
-//         pthread_mutex_lock(&mtx);
-//         //puzzle_list.push(*board);
-//         //pthread_mutex_unlock(&mtx);
-
-//         if (puzzle_list.empty()) {
-//             // Release lock and terminate thread if no more puzzles
-//             pthread_mutex_unlock(&mtx);
-            
-//             break;
-//         }
-        
-//         // Pop a puzzle from the global puzzle list
-//         vector<vector<int>> current_board = puzzle_list.front();
-//         puzzle_list.pop();
-        
-//         // Release lock after accessing the global puzzle list
-//         pthread_mutex_unlock(&mtx);
-        
-//         bool found_solution = false;
-
-//         // Find an empty cell
-//         int row = -1;
-//         int col = -1;
-
-//         for (int i = 0; i < N; ++i) {
-//             for (int j = 0; j < N; ++j) {
-//                 if (current_board[i][j] == 0) {
-//                     row = i;
-//                     col = j;
-//                     break;
-//                 }
-//             }
-//             if (row != -1) break;
-//         }
-        
-
-//         // If no empty cell found, we have a solution
-//         if (row == -1) {
-//             found_solution = true;
-            
-//             // Acquire lock before updating shared resources
-//             pthread_mutex_lock(&mtx);
-            
-//             // Update final_board if solution found
-//             final_board = current_board;
-
-//             // Clear puzzle list to signal other threads to terminate
-//             puzzle_list = queue<vector<vector<int>>>();
-
-//             // Release lock after updating shared resources
-//             pthread_mutex_unlock(&mtx);
-//         }
-
-//         // If solution found, break out of the loop
-//         if (found_solution) break;
-
-//         // Try each number in the empty cell
-//         for (int num = 1; num <= 9; ++num) {
-//             if (isValid(current_board, row, col, num)) {
-
-//                 current_board[row][col] = num;
-
-//                 // Acquire lock before pushing the new board to the puzzle list
-//                 pthread_mutex_lock(&mtx);
-
-//                 // printBoard(current_board);
-//                 // std::cout<<"\n";
-
-//                 // Push the new board to the global puzzle list
-//                 puzzle_list.push(current_board);
-                
-//                 // Release lock after pushing the new board
-//                 pthread_mutex_unlock(&mtx);
-//             }
-//         }
-//     }
-    
-//     return nullptr;
-// }
 
 // Generate initial Sudoku board
 void initializeBoard(vector<vector<int> >& board) {
@@ -264,15 +178,15 @@ int main() {
     vector<vector<int> > board(N, vector<int>(N, 0));
 
     board = {{0, 0, 0, 0, 0, 0, 2, 3, 0},
-{2, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 3, 0, 8, 0, 0},
-{8, 6, 0, 0, 0, 0, 0, 0, 0},
-{0, 0, 2, 9, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 0, 0, 0},
-{0, 3, 0, 0, 7, 1, 0, 0, 0},
-{0, 0, 0, 0, 9, 3, 0, 0, 0},
-{0, 8, 0, 0, 0, 0, 0, 0, 0},
-};
+    {2, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 3, 0, 8, 0, 0},
+    {8, 6, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 2, 9, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 3, 0, 0, 7, 1, 0, 0, 0},
+    {0, 0, 0, 0, 9, 3, 0, 0, 0},
+    {0, 8, 0, 0, 0, 0, 0, 0, 0},
+    };
 
     //initializeBoard(board);
     
@@ -340,61 +254,3 @@ int main() {
 
     return 0;
 }
-
-
-// void* solveSudoku(void* arg) {
-//     vector<vector<int>>* board = static_cast<vector<vector<int>>*>(arg);
-
-//     pthread_mutex_lock(&mtx);
-//     puzzle_list.push(*board);
-//     pthread_mutex_unlock(&mtx);
-
-//     while (!puzzle_list.empty()) {
-
-//         pthread_mutex_lock(&mtx);
-//         vector<vector<int>> current_board = puzzle_list.front();
-//         puzzle_list.pop();
-//         pthread_mutex_unlock(&mtx);
-//         bool found_solution = false;
-
-//         // Find an empty cell
-//         int row = -1;
-//         int col = -1;
-
-//         for (int i = 0; i < N; ++i) {
-//             for (int j = 0; j < N; ++j) {
-//                 if (current_board[i][j] == 0) {
-//                     row = i;
-//                     col = j;
-//                     break;
-//                 }
-//             }
-//             if (row != -1) break;
-//         }
-
-//         // If no empty cell found, we have a solution
-//         if (row == -1) {
-//             found_solution = true;
-//             pthread_mutex_lock(&mtx);
-//             final_board = current_board;
-//             puzzle_list = queue<vector<vector<int>>>(); // Clear puzzle list to signal other threads to terminate
-//             pthread_mutex_unlock(&mtx);
-//         }
-
-//         if (found_solution) break;
-
-//         // Try each number in the empty cell
-//         for (int num = 1; num <= 9; ++num) {
-//             if (isValid(current_board, row, col, num)) {
-//                 current_board[row][col] = num;
-
-//                 // Push the new board to the puzzle list
-//                 pthread_mutex_lock(&mtx);
-//                 puzzle_list.push(current_board);
-//                 pthread_mutex_unlock(&mtx);
-//             }
-//         }
-        
-//     }
-//     return nullptr;
-//  }
