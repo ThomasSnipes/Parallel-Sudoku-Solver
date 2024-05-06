@@ -6,6 +6,8 @@
 #include <mutex>
 #include <cstdlib> 
 #include <algorithm>
+#include <mutex>
+#include <future>
 
 using namespace std;
 
@@ -13,11 +15,10 @@ const int N = 9;
 const int SUBGRID_SIZE = 3;
 const int num_threads = 5;
 const int NUM_STARTING_CELLS = 20;
-const int MAX = 5000;
+const int MAX = 1000;
 int iter = 0;
 
-
-vector<vector<int> > board(N, vector<int>(N, 0));
+//vector<vector<int> > board(N, vector<int>(N, 0));
 vector<vector<vector<int>>> solutions;
 
 void printBoard(vector<vector<int>> board) {
@@ -36,7 +37,7 @@ void printBoard(vector<vector<int>> board) {
     }
 }
 
-bool isValid(int row, int col, int num) {
+bool isValid(int row, int col, int num, vector<vector<int>>& board) {
     //Check row and col
     for (int i = 0; i < N; ++i) {
         if (board[row][i] == num || board[i][col] == num)
@@ -57,7 +58,7 @@ bool isValid(int row, int col, int num) {
     return true;
 }
 
-bool findEmptyPlace(int &row, int &col){
+bool findEmptyPlace(int &row, int &col, vector<vector<int>>& board){
    for (row = 0; row < N; row++)
       for (col = 0; col < N; col++)
          if (board[row][col] == 0) //marked with 0 is empty
@@ -76,14 +77,16 @@ bool boardsEqual(const vector<vector<int>>& board1, const vector<vector<int>>& b
     return true;
 }
 
+mutex mtx;
 
-bool solveSudoku() {
+bool solveSudoku(vector<vector<int>> board) {
     int row;
     int col;
 
-    if (!findEmptyPlace(row, col)) {
+    if (!findEmptyPlace(row, col, board)) {
         
         bool unique_solution = true;
+        std::lock_guard<std::mutex> lock(mtx);
 
         // Check if the current board is already in solutions
         for (const auto& sol : solutions) {
@@ -107,10 +110,10 @@ bool solveSudoku() {
 
     for (int num : nums) {
 
-        if (isValid(row, col, num)) {
+        if (isValid(row, col, num, board)) {
             board[row][col] = num;
 
-            if (solveSudoku()) {
+            if (solveSudoku(board)) {
                 return true;
             }
 
@@ -120,28 +123,7 @@ bool solveSudoku() {
     return false;
 }
 
-
-vector<vector<int>> initializeBoard() {
-    vector<vector<int>> initialBoard(N, vector<int>(N, 0));
-    srand(time(0));
-    int count = NUM_STARTING_CELLS;
-
-    while (count > 0) {
-        int row = rand() % N;
-        int col = rand() % N;
-        int num = rand() % N + 1;
-
-        if (initialBoard[row][col] == 0 && isValid(row, col, num)) {
-            initialBoard[row][col] = num;
-            count--;
-        }
-    }
-
-    return initialBoard;
-}
-
-int main() {
-
+int start_solve() {
     // Example of a board that only has 1 solution
     // Used to test if the program finds incorrect solutions
 //     board = 
@@ -156,19 +138,7 @@ int main() {
 //     {7, 0, 0, 3, 0, 0, 1, 0, 0},
 //     };
 
-//     board = 
-//    {{0, 0, 0, 4, 0, 5, 0, 0, 0},
-//     {5, 0, 0, 0, 2, 0, 0, 0, 1},
-//     {0, 0, 4, 0, 7, 0, 0, 0, 3},
-//     {0, 0, 8, 9, 4, 0, 6, 0, 0},
-//     {0, 0, 0, 8, 0, 0, 4, 0, 0},
-//     {1, 0, 0, 0, 6, 0, 0, 9, 0},
-//     {8, 0, 0, 3, 0, 0, 0, 0, 5},
-//     {0, 0, 9, 0, 0, 0, 0, 2, 0},
-//     {0, 0, 0, 0, 0, 8, 0, 0, 0},
-//     };
-
-    board = 
+    vector<vector<int> > board = 
    {{0, 0, 0, 4, 0, 5, 0, 0, 0},
     {0, 0, 0, 0, 2, 0, 0, 0, 1},
     {0, 0, 4, 0, 0, 0, 0, 0, 0},
@@ -181,23 +151,64 @@ int main() {
     };
     
     //board = initializeBoard();
-
     vector<vector<int> > start_board = board;
-    printBoard(board);
 
     auto start_time = chrono::high_resolution_clock::now();
-    
+
     for(int i=0; i<MAX; i++){
         // Reset board before solving again
-        solveSudoku();
+        solveSudoku(board);
         board = start_board;
     }
 
     auto end_time = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::seconds>(end_time - start_time).count();
 
+    return duration;
+}
+
+// vector<vector<int>> initializeBoard() {
+//     vector<vector<int>> initialBoard(N, vector<int>(N, 0));
+//     srand(time(0));
+//     int count = NUM_STARTING_CELLS;
+
+//     while (count > 0) {
+//         int row = rand() % N;
+//         int col = rand() % N;
+//         int num = rand() % N + 1;
+
+//         if (initialBoard[row][col] == 0 && isValid(row, col, num, board)) {
+//             initialBoard[row][col] = num;
+//             count--;
+//         }
+//     }
+//     return initialBoard;
+// }
+
+int main() {
+   
+    //printBoard(board);
+    
+    std::vector<std::future<int>> futures;
+
+    for (int i = 0; i < 4; ++i) {
+        futures.emplace_back(std::async(std::launch::async, start_solve));
+    }
+
+    // Step 6: Wait for all threads to finish and collect exec_time_i
+    std::vector<int> exec_times;
+    for (auto& future : futures) {
+        exec_times.push_back(future.get());
+    }
+
+    for (int time : exec_times) {
+        std::cout << "Execution time: " << time << " seconds" << std::endl;
+    }
+
     std::cout << "Number of solutions: " << solutions.size() << endl;
-    std::cout << "Runtime duration: " << duration << " seconds" << endl;
+
+    // std::cout << "Number of solutions: " << solutions.size() << endl;
+    // std::cout << "Runtime duration: " << duration << " seconds" << endl;
 
     // Print all solutions
     // for (const auto& sol : solutions) {
