@@ -95,7 +95,7 @@ bool solveSudokuUtil(int row, int col) {
 }
 
 bool solveSudoku() {
-    //measure perf
+    //measure performance
     //spawn threads here - start at 4 locations in the board
     std::vector<thread> threads;
     bool res = false;
@@ -107,31 +107,31 @@ bool solveSudoku() {
     //             });
     // }
 
-    threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(0, 0);
-                });
-    // threads.emplace_back([&](){
-    //     res = res | solveSudokuUtil(1, 1);
-    // });
-    threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(3, 1);
-                });
-    threads.emplace_back([&](){
-                    res = res | solveSudokuUtil(6, 2);
-                });
-
     // threads.emplace_back([&](){
     //                 res = res | solveSudokuUtil(0, 0);
     //             });
     // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(2, 2);
+    //     res = res | solveSudokuUtil(1, 1);
+    // });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(3, 1);
     //             });
     // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(4, 4);
+    //                 res = res | solveSudokuUtil(6, 2);
     //             });
-    // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(6, 6);
-    //             });
+
+    threads.emplace_back([&](){
+                    res = res | solveSudokuUtil(0, 0);
+                });
+    threads.emplace_back([&](){
+                    res = res | solveSudokuUtil(2, 2);
+                });
+    threads.emplace_back([&](){
+                    res = res | solveSudokuUtil(4, 4);
+                });
+    threads.emplace_back([&](){
+                    res = res | solveSudokuUtil(6, 6);
+                });
 
 
     
@@ -155,19 +155,60 @@ void printBoard() {
 
 int main() {
 
-
-    board = {
-        {5, 3, 0, 0, 7, 0, 0, 0, 0},
-        {6, 0, 0, 1, 9, 5, 0, 0, 0},
-        {0, 9, 8, 0, 0, 0, 0, 6, 0},
-        {8, 0, 0, 0, 6, 0, 0, 0, 3},
-        {4, 0, 0, 8, 0, 3, 0, 0, 1},
-        {7, 0, 0, 0, 2, 0, 0, 0, 6},
-        {0, 6, 0, 0, 0, 0, 2, 8, 0},
-        {0, 0, 0, 4, 1, 9, 0, 0, 5},
-        {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    // ----- Empty -----
+    board = 
+   {{0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
+    // --------------- True Sudoku Boards --------------- // 
+
+    // ----- Easy ----- //
+    // board = {
+    //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
+    //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
+    //     {0, 9, 8, 0, 0, 0, 0, 6, 0},
+    //     {8, 0, 0, 0, 6, 0, 0, 0, 3},
+    //     {4, 0, 0, 8, 0, 3, 0, 0, 1},
+    //     {7, 0, 0, 0, 2, 0, 0, 0, 6},
+    //     {0, 6, 0, 0, 0, 0, 2, 8, 0},
+    //     {0, 0, 0, 4, 1, 9, 0, 0, 5},
+    //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    // };
+
+    // ----- Medium ----- //
+//     board = 
+//    {{0, 0, 0, 4, 0, 5, 0, 0, 0},
+//     {5, 0, 0, 0, 2, 0, 0, 0, 1},
+//     {0, 0, 4, 0, 7, 0, 0, 0, 3},
+//     {0, 0, 8, 9, 4, 0, 6, 0, 0},
+//     {0, 0, 0, 8, 0, 0, 4, 0, 0},
+//     {1, 0, 0, 0, 6, 0, 0, 9, 0},
+//     {8, 0, 0, 3, 0, 0, 0, 0, 5},
+//     {0, 0, 9, 0, 0, 0, 0, 2, 0},
+//     {0, 0, 0, 0, 0, 8, 0, 0, 0},
+//     };
+
+// ----- Hard ----- //
+//     board = 
+//    {{0, 0, 0, 0, 0, 0, 5, 6, 0},
+//     {1, 0, 0, 0, 0, 9, 0, 0, 0},
+//     {4, 0, 0, 8, 0, 0, 0, 0, 0},
+//     {0, 5, 2, 0, 0, 0, 0, 7, 0},
+//     {0, 6, 0, 9, 0, 0, 0, 0, 0},
+//     {0, 0, 0, 1, 0, 0, 0, 0, 0},
+//     {0, 7, 0, 0, 5, 0, 0, 0, 0},
+//     {9, 0, 0, 0, 0, 0, 3, 0, 0},
+//     {0, 0, 0, 0, 0, 0, 0, 0, 1},
+//     };
+    
     // if (solveSudoku(board)) {
     //     cout << "Sudoku solved successfully:\n";
     //     printBoard(board);

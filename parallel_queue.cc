@@ -4,7 +4,9 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <cstdlib>
 #include <pthread.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -74,9 +76,12 @@ bool solveSudokuHelper(vector<vector<int>>& puzzle) {
     if (row == -1) {
         return true;
     }
+    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    random_shuffle(nums.begin(), nums.end());
 
     // Try each number in the empty cell
-    for (int num = 1; num <= 9; ++num) {
+    //for (int num = 1; num <= 9; ++num) {
+    for(int num : nums){
         if (isValid(puzzle, row, col, num)) {
             // If the number is valid, update the puzzle with that number
             puzzle[row][col] = num;
@@ -151,7 +156,26 @@ void initializeBoard(vector<vector<int> >& board) {
 }
 
 int main() {
-    // vector<vector<int>> board = {
+   
+    vector<vector<int> > board(N, vector<int>(N, 0));
+
+    // ----- Empty Board ----- //
+    board = 
+   {{0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    // --------------- True Sudoku Boards --------------- // 
+
+    // ----- Easy ----- //
+    // board = {
     //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
     //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
     //     {0, 9, 8, 0, 0, 0, 0, 6, 0},
@@ -163,40 +187,40 @@ int main() {
     //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
     // };
 
-    // vector<vector<int>> board = {
-    //     {0, 0, 0, 3, 0, 0, 0, 0, 0},
-    //     {0, 0, 0, 0, 0, 8, 0, 7, 0},
-    //     {0, 0, 0, 9, 2, 0, 0, 4, 0},
-    //     {0, 0, 2, 0, 0, 0, 0, 9, 0},
-    //     {0, 0, 0, 0, 0, 0, 0, 3, 0},
-    //     {7, 3, 0, 6, 0, 0, 2, 0, 0},
-    //     {0, 0, 8, 0, 0, 0, 6, 1, 9},
-    //     {0, 0, 3, 0, 0, 5, 0, 0, 0},
-    //     {0, 0, 0, 0, 0, 6, 0, 0, 0}
-    // };
+    // ----- Medium ----- //
+    //     board = 
+    //    {{0, 0, 0, 4, 0, 5, 0, 0, 0},
+    //     {5, 0, 0, 0, 2, 0, 0, 0, 1},
+    //     {0, 0, 4, 0, 7, 0, 0, 0, 3},
+    //     {0, 0, 8, 9, 4, 0, 6, 0, 0},
+    //     {0, 0, 0, 8, 0, 0, 4, 0, 0},
+    //     {1, 0, 0, 0, 6, 0, 0, 9, 0},
+    //     {8, 0, 0, 3, 0, 0, 0, 0, 5},
+    //     {0, 0, 9, 0, 0, 0, 0, 2, 0},
+    //     {0, 0, 0, 0, 0, 8, 0, 0, 0},
+    //     };
 
-    vector<vector<int> > board(N, vector<int>(N, 0));
-
-    board = {{0, 0, 0, 0, 0, 0, 2, 3, 0},
-    {2, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 3, 0, 8, 0, 0},
-    {8, 6, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 2, 9, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 3, 0, 0, 7, 1, 0, 0, 0},
-    {0, 0, 0, 0, 9, 3, 0, 0, 0},
-    {0, 8, 0, 0, 0, 0, 0, 0, 0},
-    };
+    // ----- Hard ----- //
+//     board = 
+//    {{0, 0, 0, 0, 0, 0, 5, 6, 0},
+//     {1, 0, 0, 0, 0, 9, 0, 0, 0},
+//     {4, 0, 0, 8, 0, 0, 0, 0, 0},
+//     {0, 5, 2, 0, 0, 0, 0, 7, 0},
+//     {0, 6, 0, 9, 0, 0, 0, 0, 0},
+//     {0, 0, 0, 1, 0, 0, 0, 0, 0},
+//     {0, 7, 0, 0, 5, 0, 0, 0, 0},
+//     {9, 0, 0, 0, 0, 0, 3, 0, 0},
+//     {0, 0, 0, 0, 0, 0, 0, 0, 1},
+//     };
 
     //initializeBoard(board);
     
-    //printBoard(board);
     
     pthread_mutex_init(&mtx, nullptr);
     puzzle_list.push(board);
 
     // Create threads
-    pthread_t thread1, thread2, thread3, thread4, thread5, thread6, thread7, thread8, thread9, thread10, thread11, thread12, thread13, thread14, thread15, thread16;
+    pthread_t thread1, thread2, thread3, thread4;// thread5, thread6, thread7, thread8;
 
     auto start_time = chrono::high_resolution_clock::now();
 
@@ -204,38 +228,23 @@ int main() {
     pthread_create(&thread2, nullptr, solveSudoku, (void*)&board);
     pthread_create(&thread3, nullptr, solveSudoku, (void*)&board);
     pthread_create(&thread4, nullptr, solveSudoku, (void*)&board);
-    pthread_create(&thread5, nullptr, solveSudoku, (void*)&board);
-    pthread_create(&thread6, nullptr, solveSudoku, (void*)&board);
-    pthread_create(&thread7, nullptr, solveSudoku, (void*)&board);
-    pthread_create(&thread8, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread5, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread6, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread7, nullptr, solveSudoku, (void*)&board);
+    // pthread_create(&thread8, nullptr, solveSudoku, (void*)&board);
 
-    // pthread_create(&thread9, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread10, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread11, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread12, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread13, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread14, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread15, nullptr, solveSudoku, (void*)&board);
-    // pthread_create(&thread16, nullptr, solveSudoku, (void*)&board);
 
     // Wait for threads to finish
     pthread_join(thread1, nullptr);
     pthread_join(thread2, nullptr);
     pthread_join(thread3, nullptr);
     pthread_join(thread4, nullptr);
-    pthread_join(thread5, nullptr);
-    pthread_join(thread6, nullptr);
-    pthread_join(thread7, nullptr);
-    pthread_join(thread8, nullptr);
+    // pthread_join(thread5, nullptr);
+    // pthread_join(thread6, nullptr);
+    // pthread_join(thread7, nullptr);
+    // pthread_join(thread8, nullptr);
 
-    // pthread_join(thread9, nullptr);
-    // pthread_join(thread10, nullptr);
-    // pthread_join(thread11, nullptr);
-    // pthread_join(thread12, nullptr);
-    // pthread_join(thread13, nullptr);
-    // pthread_join(thread14, nullptr);
-    // pthread_join(thread15, nullptr);
-    // pthread_join(thread16, nullptr);
+
 
     pthread_mutex_destroy(&mtx);
 
