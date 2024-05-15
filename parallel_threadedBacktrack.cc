@@ -4,17 +4,23 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <shared_mutex>
 
 using namespace std;
 
 const int N = 9;
 const int subSize = 3;
 const int num_threads = 5;
-std::atomic<int> filled_counter{};
+std::atomic<int> filled_counter{0};
+std::atomic<int> correct{0};
+std::atomic<int> incorrect{0};
 vector<vector<int>> board;
-
+//std::shared_mutex mtx; //global mutex
+mutex mtx;
 
 bool isValid(int row, int col, int num) {
+    //std::shared_lock<std::shared_mutex> lock(mtx);
+
     //Check row and col
     for (int i = 0; i < N; ++i) {
         if (board[row][i] == num || board[i][col] == num)
@@ -35,7 +41,7 @@ bool isValid(int row, int col, int num) {
     return true;
 }
 
-mutex mtx; //global mutex
+
 
 bool solveSudokuUtil(int row, int col) {
     //At end of grid 
@@ -72,8 +78,10 @@ bool solveSudokuUtil(int row, int col) {
             //scope for lock
             {
                 lock_guard<mutex> lock(mtx);
+                //std::unique_lock<std::shared_mutex> lock(mtx);
                 board[row][col] = num;
                 filled_counter++;
+                correct++;
                 //std::cout << filled_counter << std::endl;
             }
             
@@ -84,9 +92,12 @@ bool solveSudokuUtil(int row, int col) {
             //begin backtrack
             {
                 lock_guard<mutex> lock(mtx);
+                //std::unique_lock<std::shared_mutex> lock(mtx);
                 board[row][col] = 0;
                 //bad choice, remove it
                 filled_counter--;
+                correct --;
+                incorrect ++;
                 //std::cout << filled_counter << std::endl;
             }
         }
@@ -100,19 +111,19 @@ bool solveSudoku() {
     std::vector<thread> threads;
     bool res = false;
     auto start_time = std::chrono::high_resolution_clock::now();
-    
-    // for (int i = 0; i < num_threads; i++){
-    //     threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(i, 0);
-    //             });
-    // }
 
+    //--2 THREAD SET--
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(0, 0);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(4, 5);
+    //             });
+
+    //--3 THREAD SET--
     threads.emplace_back([&](){
                     res = res | solveSudokuUtil(0, 0);
                 });
-    // threads.emplace_back([&](){
-    //     res = res | solveSudokuUtil(1, 1);
-    // });
     threads.emplace_back([&](){
                     res = res | solveSudokuUtil(3, 1);
                 });
@@ -120,6 +131,7 @@ bool solveSudoku() {
                     res = res | solveSudokuUtil(6, 2);
                 });
 
+    //--4 THREAD SET--
     // threads.emplace_back([&](){
     //                 res = res | solveSudokuUtil(0, 0);
     //             });
@@ -130,7 +142,24 @@ bool solveSudoku() {
     //                 res = res | solveSudokuUtil(4, 4);
     //             });
     // threads.emplace_back([&](){
-    //                 res = res | solveSudokuUtil(6, 6);
+    //                 res = res | solveSudokuUtil(6, 7);
+    //             });
+
+    //--5 THREAD SET--
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(0, 0);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(1, 7);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(3, 5);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(5, 3);
+    //             });
+    // threads.emplace_back([&](){
+    //                 res = res | solveSudokuUtil(7, 1);
     //             });
 
 
@@ -141,6 +170,9 @@ bool solveSudoku() {
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     std::cout << "runtime duration:: " << duration << " microseconds" << std::endl;
+    std::cout << "Filled::: " << filled_counter << std::endl;
+    std::cout << "Correct::" << correct << std::endl;
+    std::cout << "Incorrect:: " << incorrect << std::endl;
     return res;
 }
 
@@ -155,25 +187,54 @@ void printBoard() {
 
 int main() {
 
+    //--EMPTY--
+    // board={{0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     };
 
-    board = {
-        {5, 3, 0, 0, 7, 0, 0, 0, 0},
-        {6, 0, 0, 1, 9, 5, 0, 0, 0},
-        {0, 9, 8, 0, 0, 0, 0, 6, 0},
-        {8, 0, 0, 0, 6, 0, 0, 0, 3},
-        {4, 0, 0, 8, 0, 3, 0, 0, 1},
-        {7, 0, 0, 0, 2, 0, 0, 0, 6},
-        {0, 6, 0, 0, 0, 0, 2, 8, 0},
-        {0, 0, 0, 4, 1, 9, 0, 0, 5},
-        {0, 0, 0, 0, 8, 0, 0, 7, 9}
-    };
+    //--EASY--
+    // board = {
+    //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
+    //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
+    //     {0, 9, 8, 0, 0, 0, 0, 6, 0},
+    //     {8, 0, 0, 0, 6, 0, 0, 0, 3},
+    //     {4, 0, 0, 8, 0, 3, 0, 0, 1},
+    //     {7, 0, 0, 0, 2, 0, 0, 0, 6},
+    //     {0, 6, 0, 0, 0, 0, 2, 8, 0},
+    //     {0, 0, 0, 4, 1, 9, 0, 0, 5},
+    //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    // };
 
-    // if (solveSudoku(board)) {
-    //     cout << "Sudoku solved successfully:\n";
-    //     printBoard(board);
-    // } else {
-    //     cout << "No solution exists for the given Sudoku.\n";
-    // }
+    //--MED--
+    // board={{0, 0, 0, 4, 0, 5, 0, 0, 0},
+    //     {5, 0, 0, 0, 2, 0, 0, 0, 1},
+    //     {0, 0, 4, 0, 7, 0, 0, 0, 3},
+    //     {0, 0, 8, 9, 4, 0, 6, 0, 0},
+    //     {0, 0, 0, 8, 0, 0, 4, 0, 0},
+    //     {1, 0, 0, 0, 6, 0, 0, 9, 0},
+    //     {8, 0, 0, 3, 0, 0, 0, 0, 5},
+    //     {0, 0, 9, 0, 0, 0, 0, 2, 0},
+    //     {0, 0, 0, 0, 0, 8, 0, 0, 0},
+    //     };
+
+    //--HARD--
+    board={{0, 0, 0, 0, 0, 0, 2, 3, 0},
+        {2, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 3, 0, 8, 0, 0},
+        {8, 6, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 2, 9, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 3, 0, 0, 7, 1, 0, 0, 0},
+        {0, 0, 0, 0, 9, 3, 0, 0, 0},
+        {0, 8, 0, 0, 0, 0, 0, 0, 0},
+        };
 
     if (solveSudoku()) {
         cout << "Sudoku solved successfully:\n";

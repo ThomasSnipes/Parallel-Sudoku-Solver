@@ -15,6 +15,9 @@ const int NUM_STARTING_CELLS = 20;
 
 vector<vector<int> > grid(N, vector<int>(N, 0));
 
+int correct = 0;
+int incorrect = 0;
+
 //checks if num is in the column
 bool isPresentCol(int col, int num){
     for (int row = 0; row < N; row++)
@@ -80,9 +83,15 @@ bool solveSudoku(){
         //check if location is valid for num, then place it
         if (isValidPlace(row, col, num)){ 
             grid[row][col] = num;
+            correct ++;
             if (solveSudoku()) //recursively go for other rooms in the grid
                 return true;
-            grid[row][col] = 0; //turn to unassigned space when conditions are not satisfied
+            else {
+                grid[row][col] = 0; //turn to unassigned space when conditions are not satisfied
+                correct --;
+                incorrect++;
+            }
+            
         }
     }
     return false;
@@ -107,17 +116,54 @@ void printBoard() {
 
 int main(){
     //need to construct a grid or read one in from file
-    grid = {
-        {5, 3, 0, 0, 7, 0, 0, 0, 0},
-        {6, 0, 0, 1, 9, 5, 0, 0, 0},
-        {0, 9, 8, 0, 0, 0, 0, 6, 0},
-        {8, 0, 0, 0, 6, 0, 0, 0, 3},
-        {4, 0, 0, 8, 0, 3, 0, 0, 1},
-        {7, 0, 0, 0, 2, 0, 0, 0, 6},
-        {0, 6, 0, 0, 0, 0, 2, 8, 0},
-        {0, 0, 0, 4, 1, 9, 0, 0, 5},
-        {0, 0, 0, 0, 8, 0, 0, 7, 9}
-    };
+    //--EASY--
+    // grid = {
+    //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
+    //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
+    //     {0, 9, 8, 0, 0, 0, 0, 6, 0},
+    //     {8, 0, 0, 0, 6, 0, 0, 0, 3},
+    //     {4, 0, 0, 8, 0, 3, 0, 0, 1},
+    //     {7, 0, 0, 0, 2, 0, 0, 0, 6},
+    //     {0, 6, 0, 0, 0, 0, 2, 8, 0},
+    //     {0, 0, 0, 4, 1, 9, 0, 0, 5},
+    //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    // };
+
+    //--MED--
+    // grid={{0, 0, 0, 4, 0, 5, 0, 0, 0},
+    //     {5, 0, 0, 0, 2, 0, 0, 0, 1},
+    //     {0, 0, 4, 0, 7, 0, 0, 0, 3},
+    //     {0, 0, 8, 9, 4, 0, 6, 0, 0},
+    //     {0, 0, 0, 8, 0, 0, 4, 0, 0},
+    //     {1, 0, 0, 0, 6, 0, 0, 9, 0},
+    //     {8, 0, 0, 3, 0, 0, 0, 0, 5},
+    //     {0, 0, 9, 0, 0, 0, 0, 2, 0},
+    //     {0, 0, 0, 0, 0, 8, 0, 0, 0},
+    //     };
+
+    //--HARD--
+    // grid={{0, 0, 0, 0, 0, 0, 2, 3, 0},
+    //     {2, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 3, 0, 8, 0, 0},
+    //     {8, 6, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 2, 9, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 3, 0, 0, 7, 1, 0, 0, 0},
+    //     {0, 0, 0, 0, 9, 3, 0, 0, 0},
+    //     {0, 8, 0, 0, 0, 0, 0, 0, 0},
+    //     };
+
+    //--EMPTY--
+    grid={{0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        };
 
     auto start_time = std::chrono::high_resolution_clock::now();
     bool res = solveSudoku();
@@ -127,6 +173,9 @@ int main(){
 
     if (res){
         cout << "solution found! " << endl;
+        cout << "Correct placements:: " << correct << endl;
+        cout << "Incorrect placements:: " << incorrect << endl;
+
         printBoard();
     }     
     else
