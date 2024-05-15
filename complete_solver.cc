@@ -42,7 +42,7 @@ bool isValid(int row, int col, int num) {
             return false;
     }
     
-    // Check if the number is already present in the 3x3 box
+    // Check if the number is already present in the subgrid
     int startRow = row - row % 3;
     int startCol = col - col % 3;
 
@@ -59,7 +59,7 @@ bool isValid(int row, int col, int num) {
 bool findEmptyPlace(int &row, int &col){
    for (row = 0; row < N; row++)
       for (col = 0; col < N; col++)
-         if (board[row][col] == 0) //marked with 0 is empty
+         if (board[row][col] == 0) 
             return true;
    return false;
 }
@@ -258,12 +258,7 @@ int main() {
     std::cout << "Number of solutions: " << solutions.size() << endl;
     std::cout << "Runtime duration: " << duration << " seconds" << endl;
 
-    // Print all solutions
-    // for (const auto& sol : solutions) {
-    //     std::cout << "Solution:" << endl;
-    //     printBoard(sol);
-    //     std::cout << endl;
-    // }
+
 
     return 0;
 }

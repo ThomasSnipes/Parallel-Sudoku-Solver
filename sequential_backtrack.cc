@@ -79,7 +79,7 @@ bool solveSudoku(){
     int row, col;
     if (!findEmptyPlace(row, col))
         return true; //when all places are filled
-    for (int num = 1; num <= 9; num++){ //valid numbers are 1 - 9
+    for (int num = 1; num <= 9; num++){ 
         //check if location is valid for num, then place it
         if (isValidPlace(row, col, num)){ 
             grid[row][col] = num;

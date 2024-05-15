@@ -17,7 +17,6 @@ std::atomic<int> incorrect{0};
 vector<vector<int>> board;
 
 bool isValid(int row, int col, int num) {
-    //std::shared_lock<std::shared_mutex> lock(mtx);
 
     //Check row and col
     for (int i = 0; i < N; ++i) {
@@ -68,11 +67,9 @@ bool solveSudokuUtil(int row, int col) {
             // scope for lock
             {
                 lock_guard<mutex> lock(mtx);
-                //std::unique_lock<std::shared_mutex> lock(mtx);
                 board[row][col] = num;
                 filled_counter++;
                 correct++;
-                //std::cout << filled_counter << std::endl;
             }
             
 
@@ -82,13 +79,12 @@ bool solveSudokuUtil(int row, int col) {
             //begin backtrack
             {
                 lock_guard<mutex> lock(mtx);
-                //std::unique_lock<std::shared_mutex> lock(mtx);
                 board[row][col] = 0;
+
                 //bad choice, remove it
                 filled_counter--;
                 correct --;
                 incorrect ++;
-                //std::cout << filled_counter << std::endl;
             }
         }
     }
@@ -237,14 +233,4 @@ int main() {
     }
     return 0;
 
-
-
-
-    if (solveSudoku()) {
-        cout << "Sudoku solved successfully:\n";
-        printBoard();
-    } else {
-        cout << "No solution exists for the given Sudoku.\n";
-    }
-    return 0;
 }

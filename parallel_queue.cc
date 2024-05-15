@@ -79,12 +79,10 @@ bool solveSudokuHelper(vector<vector<int>>& puzzle) {
     if (row == -1) {
         return true;
     }
-    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    random_shuffle(nums.begin(), nums.end());
+ 
 
     // Try each number in the empty cell
-    //for (int num = 1; num <= 9; ++num) {
-    for(int num : nums){
+    for (int num = 1; num <= 9; ++num) {
         if (isValid(puzzle, row, col, num)) {
             // If the number is valid, update the puzzle with that number
             puzzle[row][col] = num;

@@ -19,8 +19,6 @@ const int NUM_STARTING_CELLS = 20;
 const int num_threads = 6;
 const int MAX = 1666;
 
-
-//vector<vector<int> > board(N, vector<int>(N, 0));
 vector<vector<vector<int>>> solutions;
 
 void printBoard(vector<vector<int>> board) {
@@ -243,9 +241,7 @@ int start_solve() {
 
 
 int main() {
-   
-    //printBoard(board);
-    
+       
     std::vector<std::future<int>> futures;
     
     for (int i = 0; i < num_threads; ++i) {
@@ -264,15 +260,6 @@ int main() {
 
     std::cout << "Number of solutions: " << solutions.size() << endl;
 
-    // std::cout << "Number of solutions: " << solutions.size() << endl;
-    // std::cout << "Runtime duration: " << duration << " seconds" << endl;
-
-    // Print all solutions
-    // for (const auto& sol : solutions) {
-    //     std::cout << "Solution:" << endl;
-    //     printBoard(sol);
-    //     std::cout << endl;
-    // }
 
     return 0;
 }
