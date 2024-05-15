@@ -6,7 +6,7 @@
 #include <queue>
 #include <cstdlib>
 #include <pthread.h>
-#include <algorithm>
+#include<atomic>
 
 using namespace std;
 
@@ -18,6 +18,9 @@ pthread_mutex_t mtx; // Mutex for synchronization
 vector<vector<int> > grid(N, vector<int>(N, 0));
 queue<vector<vector<int>>> puzzle_list; // Global puzzle list
 vector<vector<int>> final_board;
+
+std::atomic<int> correct{0};
+std::atomic<int> incorrect{0};
 
 bool isValid(const vector<vector<int>>& board, int row, int col, int num) {
     // Check row and column
@@ -85,6 +88,7 @@ bool solveSudokuHelper(vector<vector<int>>& puzzle) {
         if (isValid(puzzle, row, col, num)) {
             // If the number is valid, update the puzzle with that number
             puzzle[row][col] = num;
+            correct++;
 
             pthread_mutex_lock(&mtx);
             puzzle_list.push(puzzle);
@@ -97,6 +101,8 @@ bool solveSudokuHelper(vector<vector<int>>& puzzle) {
 
             // If solveSudokuHelper returns false, restore the original state of the puzzle
             puzzle[row][col] = 0;
+            correct--;
+            incorrect++;
         }
     }
 
@@ -200,18 +206,44 @@ int main() {
     //     {0, 0, 0, 0, 0, 8, 0, 0, 0},
     //     };
 
-    // ----- Hard ----- //
-//     board = 
-//    {{0, 0, 0, 0, 0, 0, 5, 6, 0},
-//     {1, 0, 0, 0, 0, 9, 0, 0, 0},
-//     {4, 0, 0, 8, 0, 0, 0, 0, 0},
-//     {0, 5, 2, 0, 0, 0, 0, 7, 0},
-//     {0, 6, 0, 9, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 1, 0, 0, 0, 0, 0},
-//     {0, 7, 0, 0, 5, 0, 0, 0, 0},
-//     {9, 0, 0, 0, 0, 0, 3, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 1},
-//     };
+    vector<vector<int> > board(N, vector<int>(N, 0));
+
+    //--EASY--
+    // board = {
+    //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
+    //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
+    //     {0, 9, 8, 0, 0, 0, 0, 6, 0},
+    //     {8, 0, 0, 0, 6, 0, 0, 0, 3},
+    //     {4, 0, 0, 8, 0, 3, 0, 0, 1},
+    //     {7, 0, 0, 0, 2, 0, 0, 0, 6},
+    //     {0, 6, 0, 0, 0, 0, 2, 8, 0},
+    //     {0, 0, 0, 4, 1, 9, 0, 0, 5},
+    //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    // };
+
+    //--MED--
+    // board={{0, 0, 0, 4, 0, 5, 0, 0, 0},
+    //     {5, 0, 0, 0, 2, 0, 0, 0, 1},
+    //     {0, 0, 4, 0, 7, 0, 0, 0, 3},
+    //     {0, 0, 8, 9, 4, 0, 6, 0, 0},
+    //     {0, 0, 0, 8, 0, 0, 4, 0, 0},
+    //     {1, 0, 0, 0, 6, 0, 0, 9, 0},
+    //     {8, 0, 0, 3, 0, 0, 0, 0, 5},
+    //     {0, 0, 9, 0, 0, 0, 0, 2, 0},
+    //     {0, 0, 0, 0, 0, 8, 0, 0, 0},
+    //     };
+
+    //--HARD--
+    board={{0, 0, 0, 0, 0, 0, 2, 3, 0},
+        {2, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 3, 0, 8, 0, 0},
+        {8, 6, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 2, 9, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 3, 0, 0, 7, 1, 0, 0, 0},
+        {0, 0, 0, 0, 9, 3, 0, 0, 0},
+        {0, 8, 0, 0, 0, 0, 0, 0, 0},
+        };
 
     //initializeBoard(board);
     
@@ -246,13 +278,15 @@ int main() {
 
 
 
-    pthread_mutex_destroy(&mtx);
-
-
+    
     auto end_time = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(end_time - start_time).count();
 
+    pthread_mutex_destroy(&mtx);
+
     cout << "Runtime duration: " << duration << " microseconds" << endl;
+    std::cout << "Correct::" << correct << std::endl;
+    std::cout << "Incorrect:: " << incorrect << std::endl;
 
     if (!final_board.empty()) {
         cout << "Solved successfully:\n";

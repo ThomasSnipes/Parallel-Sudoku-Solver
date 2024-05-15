@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <shared_mutex> 
 
 using namespace std;
 
@@ -11,29 +12,53 @@ const int N = 9;
 const int SUBGRID_SIZE = 3;
 const int num_threads = 4;
 //const int NUM_STARTING_CELLS = 20;
+std::atomic<int> correct{0};
+std::atomic<int> incorrect{0};
 
 vector<vector<int> > board(N, vector<int>(N, 0));
 
-bool isValid(int row, int col, int num) {
-    //Check row and col
-    for (int i = 0; i < N; ++i) {
-        if (board[row][i] == num || board[i][col] == num)
-            return false;
-    }
-    // Check if the number is already present in the 3x3 box
-    int startRow = row - row % 3;
-    int startCol = col - col % 3;
-    // Loop over local grid
-    for (int i = 0; i < SUBGRID_SIZE; ++i) {
-        for (int j = 0; j < SUBGRID_SIZE; ++j) {
-            if (board[i + startRow][j + startCol] == num)
-                return false;
-        }
-    }
-    return true;
-}
+//locks
+std::vector<std::shared_mutex*> rows(N, new std::shared_mutex);
+std::vector<std::shared_mutex*> cols(N, new std::shared_mutex);
+// std::vector<std::shared_mutex*> grid(N, new std::shared_mutex);
 
 mutex mtx; //global mutex
+shared_mutex mtx1;
+
+bool isValid(int row, int col, int num) {
+
+    //lock for the row, col, and grid local
+    {
+        // rows[row]->lock_shared();
+        // cols[col]->lock_shared();
+
+        std::shared_lock<std::shared_mutex> lock(mtx1);
+
+        //Check row and col
+        for (int i = 0; i < N; ++i) {
+            if (board[row][i] == num || board[i][col] == num)
+                return false;
+        }
+        // Check if the number is already present in the 3x3 box
+        int startRow = row - row % 3;
+        int startCol = col - col % 3;
+        // Loop over local grid
+        for (int i = 0; i < SUBGRID_SIZE; ++i) {
+            for (int j = 0; j < SUBGRID_SIZE; ++j) {
+                if (board[i + startRow][j + startCol] == num)
+                    return false;
+            }
+        }
+        return true;
+
+        // rows[row]->unlock_shared();
+        // cols[col]->unlock_shared();
+    }
+    
+}
+
+
+
 
 bool solveSudokuUtil(int row, int col) {
     if (row == N - 1 && col == N){
@@ -55,14 +80,27 @@ bool solveSudokuUtil(int row, int col) {
             // Place the number and recursively solve for the next cell
             //lock before placing
             {//scope for lock
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                //lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = num;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct++;
             }
             if (solveSudokuUtil(row, col + 1)) //increase column index here
                 return true;
             {//placement was bad
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                //lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = 0;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct--;
+                incorrect++;
             }
         }
     }
@@ -89,14 +127,27 @@ bool solveSudokuUtil1(int row, int col) {
             // Place the number and recursively solve for the next cell
             //lock before placing
             {//scope for lock
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                //lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = num;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct++;
             }
             if (solveSudokuUtil1(row, col - 1)) //increase column index here
                 return true;
             {//placement was bad
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                //lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = 0;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct--;
+                incorrect++;
             }
         }
     }
@@ -123,14 +174,27 @@ bool solveSudokuUtil2(int row, int col) {
             // Place the number and recursively solve for the next cell
             //lock before placing
             {//scope for lock
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                // lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = num;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct++;
             }
             if (solveSudokuUtil2(row, col - 1)) //increase column index here
                 return true;
             {//placement was bad
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                // lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = 0;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct--;
+                incorrect++;
             }
         }
     }
@@ -157,14 +221,27 @@ bool solveSudokuUtil3(int row, int col) {
             // Place the number and recursively solve for the next cell
             //lock before placing
             {//scope for lock
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                // lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = num;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct++;
             }
             if (solveSudokuUtil3(row, col + 1)) //increase column index here
                 return true;
             {//placement was bad
-                lock_guard<mutex> lock(mtx);
+                std::unique_lock<std::shared_mutex> lock(mtx1);
+                //lock_guard<mutex> lock(mtx);
+                // rows[row]->lock();
+                // cols[col]->lock();
                 board[row][col] = 0;
+                // rows[row]->unlock();
+                // cols[col]->unlock();
+                correct--;
+                incorrect++;
             }
         }
     }
@@ -184,10 +261,10 @@ bool solveSudoku() {
                     res = res | solveSudokuUtil1(0, N-1);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil2(N-1, 0);
+                    res = res | solveSudokuUtil3(N-1, 0);
                 });
     threads.emplace_back([&](){
-                    res = res | solveSudokuUtil3(N-1, N-1);
+                    res = res | solveSudokuUtil2(N-1, N-1);
                 });
     for (auto &t : threads){
         t.join();
@@ -195,6 +272,8 @@ bool solveSudoku() {
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     std::cout << "runtime duration:: " << duration << " microseconds" << std::endl;
+    std::cout << "Correct :: " << correct << std::endl;
+    std::cout << "Incorrect :: " << incorrect << std::endl;
     return res;
 }
 
@@ -235,22 +314,7 @@ void printBoard(vector<vector<int>> board) {
 int main() {
 
 
-    // ----- Empty Board ----- //
-//     board = 
-//    {{0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-//     };
-
-    // --------------- True Sudoku Boards --------------- // 
-
-    // ----- Easy ----- //
+    //--EASY--
     // board = {
     //     {5, 3, 0, 0, 7, 0, 0, 0, 0},
     //     {6, 0, 0, 1, 9, 5, 0, 0, 0},
@@ -263,31 +327,41 @@ int main() {
     //     {0, 0, 0, 0, 8, 0, 0, 7, 9}
     // };
 
-    // ----- Medium ----- //
-    //     board = 
-    //    {{0, 0, 0, 4, 0, 5, 0, 0, 0},
-    //     {5, 0, 0, 0, 2, 0, 0, 0, 1},
-    //     {0, 0, 4, 0, 7, 0, 0, 0, 3},
-    //     {0, 0, 8, 9, 4, 0, 6, 0, 0},
-    //     {0, 0, 0, 8, 0, 0, 4, 0, 0},
-    //     {1, 0, 0, 0, 6, 0, 0, 9, 0},
-    //     {8, 0, 0, 3, 0, 0, 0, 0, 5},
-    //     {0, 0, 9, 0, 0, 0, 0, 2, 0},
-    //     {0, 0, 0, 0, 0, 8, 0, 0, 0},
+    //--MED--
+    board={{0, 0, 0, 4, 0, 5, 0, 0, 0},
+        {5, 0, 0, 0, 2, 0, 0, 0, 1},
+        {0, 0, 4, 0, 7, 0, 0, 0, 3},
+        {0, 0, 8, 9, 4, 0, 6, 0, 0},
+        {0, 0, 0, 8, 0, 0, 4, 0, 0},
+        {1, 0, 0, 0, 6, 0, 0, 9, 0},
+        {8, 0, 0, 3, 0, 0, 0, 0, 5},
+        {0, 0, 9, 0, 0, 0, 0, 2, 0},
+        {0, 0, 0, 0, 0, 8, 0, 0, 0},
+        };
+
+    //--HARD--
+    // board={{0, 0, 0, 0, 0, 0, 2, 3, 0},
+    //     {2, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 3, 0, 8, 0, 0},
+    //     {8, 6, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 2, 9, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 3, 0, 0, 7, 1, 0, 0, 0},
+    //     {0, 0, 0, 0, 9, 3, 0, 0, 0},
+    //     {0, 8, 0, 0, 0, 0, 0, 0, 0},
     //     };
 
-    // ----- Hard ----- //
-    board = 
-   {{0, 0, 0, 0, 0, 0, 5, 6, 0},
-    {1, 0, 0, 0, 0, 9, 0, 0, 0},
-    {4, 0, 0, 8, 0, 0, 0, 0, 0},
-    {0, 5, 2, 0, 0, 0, 0, 7, 0},
-    {0, 6, 0, 9, 0, 0, 0, 0, 0},
-    {0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 7, 0, 0, 5, 0, 0, 0, 0},
-    {9, 0, 0, 0, 0, 0, 3, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 1},
-    };
+    //
+    // board={{0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     };
 
     //initializeBoard(board);
     //printBoard(board);
@@ -297,5 +371,12 @@ int main() {
     } else {
         cout << "No solution exists for the given Sudoku.\n";
     }
+
+    //free ptrs
+    // for (int i = 0; i < N; i++){
+    //     delete rows[i];
+    //     delete cols[i];
+    
+    // }
     return 0;
 }
